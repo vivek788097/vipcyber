@@ -1,0 +1,57 @@
+{
+  "operators": [
+    {
+      "id": "DLC2",
+      "name": "3",
+      "passwordHash": "$2a$12$dd8zHtb//cTPk2ZfOXsXCuzZv/EIgmqz4LHSvaOrlBgERjf4fgPEy",
+      "services": [
+        "online",
+        "bank",
+        "bill",
+        "print",
+        "flight",
+        "train",
+        "recharge",
+        "due",
+        "reminder",
+        "other"
+      ],
+      "active": true
+    }
+  ],
+  "serviceData": {
+    "online": [],
+    "bank": [],
+    "bill": [],
+    "print": [],
+    "flight": [],
+    "train": [],
+    "recharge": [],
+    "due": [],
+    "reminder": [],
+    "other": []
+  },
+  "otherLinks": [
+    {
+      "id": 1786813293503,
+      "name": "PAN CARD",
+      "url": "https://onlineservices.proteantech.in/paam/endUserRegisterContact.html"
+    },
+    {
+      "id": 1786813343213,
+      "name": "AADHAR CARD",
+      "url": "https://uidai.gov.in/en/my-aadhaar/get-aadhaar"
+    },
+    {
+      "id": 1786813378721,
+      "name": "PASSPORT SEVA",
+      "url": "https://www.passportindia.gov.in/psp"
+    },
+    {
+      "id": 1786813442501,
+      "name": "ALL SARVICES",
+      "url": "https://vview.xyz/admin/panel/index"
+    }
+  ],
+  "bankLinks": []
+}
