@@ -1139,12 +1139,13 @@ const firebaseConfig={
 MAIN FIREBASE APP
 ================================= */
 
-const app=initializeApp(firebaseConfig);
+const app =
+  getApps().length
+  ? getApp()
+  : initializeApp(firebaseConfig);
 
-const auth=getAuth(app);
-
-const db=getFirestore(app);
-
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 /*
  Admin का Firebase Authentication Email.
