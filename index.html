@@ -3965,6 +3965,12 @@ EXPOSE FUNCTIONS
 ================================= */
 
 window.doLogin=doLogin;
+  document.getElementById("loginBtn").addEventListener(
+  "click",
+  function(){
+    doLogin();
+  }
+);
 window.logout=logout;
 window.showPage=showPage;
 
