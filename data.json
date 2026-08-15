@@ -1,0 +1,36 @@
+{
+  "operators": [
+    {
+      "id": "DLC2",
+      "name": "DLC2",
+      "passwordHash": "$2a$12$NtIA0pIA8HqanWH0eXwzwOkVAV084CM8R6kc5zTdti4/v4F9mPm6.",
+      "services": [
+        "online",
+        "bank",
+        "bill",
+        "print",
+        "flight",
+        "train",
+        "recharge",
+        "due",
+        "reminder",
+        "other"
+      ],
+      "active": false
+    }
+  ],
+  "serviceData": {
+    "online": [],
+    "bank": [],
+    "bill": [],
+    "print": [],
+    "flight": [],
+    "train": [],
+    "recharge": [],
+    "due": [],
+    "reminder": [],
+    "other": []
+  },
+  "otherLinks": [],
+  "bankLinks": []
+}
