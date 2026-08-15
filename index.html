@@ -1253,104 +1253,197 @@ LOGIN
 
 async function doLogin(){
 
- const type=$("loginType").value;
+  const type = $("loginType").value;
+  const username = $("username").value.trim();
+  const password = $("password").value;
 
- const username=
-   $("username").value.trim();
+  $("loginError").style.display = "none";
 
- const password=
-   $("password").value;
+  if(!username || !password){
+    showLoginError("Login ID और Password भरें।");
+    return;
+  }
 
- $("loginError").style.display="none";
+  try{
 
+    let email = username;
 
- if(!username || !password){
+    // ADMIN LOGIN
+    if(type === "admin"){
 
-   showLoginError(
-     "Login ID और Password भरें।"
-   );
+      // Login box में admin लिखने पर
+      // Firebase का Admin email इस्तेमाल होगा
+      if(username.toLowerCase() === "admin"){
+        email = "admin@vipcyber.com";
+      }
 
-   return;
+    }
 
- }
+    // OPERATOR LOGIN
+    if(type === "operator"){
 
+      const snap = await firebaseFns.getDocs(
+        firebaseFns.collection(
+          firebaseDB,
+          "operators"
+        )
+      );
 
- try{
+      let operator = null;
 
-   let email=username;
+      snap.forEach(d => {
 
-   let operator=null;
+        const x = d.data();
 
+        if(
+          String(x.operatorId || "")
+          .toUpperCase() ===
+          username.toUpperCase()
+          &&
+          x.active !== false
+        ){
 
-   /* ================= ADMIN ================= */
+          operator = {
+            id: d.id,
+            ...x
+          };
 
-   if(type==="admin"){
+        }
 
-     if(username.toLowerCase()!=="admin"){
+      });
 
-       showLoginError(
-         "Admin Login ID गलत है।"
-       );
+      if(!operator){
 
-       return;
+        showLoginError(
+          "Operator ID नहीं मिला।"
+        );
 
-     }
+        return;
 
-     email=ADMIN_EMAIL;
+      }
 
-   }
+      email = operator.email;
 
+    }
 
-   /* ================= OPERATOR ================= */
+    // FIREBASE LOGIN
+    const result =
+      await firebaseFns.signInWithEmailAndPassword(
+        firebaseAuth,
+        email,
+        password
+      );
 
-   if(type==="operator"){
+    const uid = result.user.uid;
 
-     const snap=
-       await firebaseFns.getDocs(
-         firebaseFns.collection(
-           firebaseDB,
-           "operators"
-         )
-       );
+    // USER PROFILE
+    const profileRef =
+      firebaseFns.doc(
+        firebaseDB,
+        "users",
+        uid
+      );
 
-     snap.forEach(d=>{
+    const profileSnap =
+      await firebaseFns.getDoc(
+        profileRef
+      );
 
-       const x=d.data();
+    let profile;
 
-       if(
-         String(x.operatorId)
-         .toUpperCase()===
-         username.toUpperCase()
-         &&
-         x.active!==false
-       ){
+    if(profileSnap.exists()){
 
-         operator={
-           id:d.id,
-           ...x
-         };
+      profile = profileSnap.data();
 
-       }
+    }else{
 
-     });
+      profile = {
 
+        uid: uid,
 
-     if(!operator){
+        email: result.user.email,
 
-       showLoginError(
-         "Operator ID नहीं मिला या Disabled है।"
-       );
+        name:
+          type === "admin"
+          ? "Administrator"
+          : "Operator",
 
-       return;
+        role: type === "admin"
+          ? "admin"
+          : "operator",
 
-     }
+        createdAt:
+          firebaseFns.serverTimestamp()
 
+      };
 
-     email=operator.email;
+      await firebaseFns.setDoc(
+        profileRef,
+        profile
+      );
 
-   }
+    }
 
+    localStorage.setItem(
+      "vipRole",
+      profile.role
+    );
 
+    localStorage.setItem(
+      "vipUserName",
+      profile.name
+    );
+
+    localStorage.setItem(
+      "vipUID",
+      uid
+    );
+
+    openApp(profile.role);
+
+  }
+
+  catch(e){
+
+    console.error("LOGIN ERROR:", e);
+
+    let message = e.message;
+
+    if(e.code === "auth/invalid-credential"){
+      message =
+        "Firebase Email या Password गलत है।";
+    }
+
+    if(e.code === "auth/invalid-email"){
+      message =
+        "Firebase Email गलत है।";
+    }
+
+    if(e.code === "auth/user-not-found"){
+      message =
+        "Firebase में यह user नहीं मिला।";
+    }
+
+    if(e.code === "auth/wrong-password"){
+      message =
+        "Password गलत है।";
+    }
+
+    if(e.code === "auth/operation-not-allowed"){
+      message =
+        "Firebase में Email/Password Login Enable नहीं है।";
+    }
+
+    if(e.code === "permission-denied"){
+      message =
+        "Firestore permission denied है। Rules check करें।";
+    }
+
+    showLoginError(message);
+
+  }
+
+}
    /* ================= FIREBASE AUTH ================= */
 
    const result=
