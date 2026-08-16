@@ -1,0 +1,17 @@
+{
+  "operators": [],
+  "serviceData": {
+    "online": [],
+    "bank": [],
+    "bill": [],
+    "print": [],
+    "flight": [],
+    "train": [],
+    "recharge": [],
+    "due": [],
+    "reminder": [],
+    "other": []
+  },
+  "otherLinks": [],
+  "bankLinks": []
+}

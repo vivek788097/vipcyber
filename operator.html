@@ -1,0 +1,80 @@
+<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VIP Cyber Cafe Operator</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#f3f6fa;color:#172536}header{background:#0b2038;color:#fff;padding:15px 20px;display:flex;justify-content:space-between}.out{background:#fff2;color:#fff;border:1px solid #fff5;padding:8px;border-radius:8px}.wrap{max-width:1050px;margin:20px auto;padding:0 15px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:15px}.card{background:#fff;padding:19px;border-radius:15px;box-shadow:0 5px 25px #0001}.open{display:inline-block;background:#1688e8;color:#fff;border:0;border-radius:8px;padding:9px 12px;text-decoration:none;margin:4px 4px 0 0}.del{background:#e53935;color:#fff}.form input{padding:9px;width:100%;margin:4px 0;border:1px solid #ccd5df;border-radius:7px}.item{border-top:1px solid #eee;padding:9px 0}.muted{color:#657789;font-size:13px}
+</style>
+<style id="vip-background-design">
+body{
+  background:
+    radial-gradient(circle at 15% 20%, rgba(23,136,232,.18) 0 10%, transparent 28%),
+    radial-gradient(circle at 85% 80%, rgba(24,180,120,.14) 0 12%, transparent 30%),
+    linear-gradient(135deg,#07111f 0%,#0b2440 48%,#123d59 100%) !important;
+  background-attachment:fixed !important;
+}
+body:before{
+  content:"";
+  position:fixed; inset:0; pointer-events:none; z-index:-1;
+  opacity:.18;
+  background-image:
+    linear-gradient(30deg,#fff 12%,transparent 12.5%,transparent 87%,#fff 87.5%,#fff),
+    linear-gradient(150deg,#fff 12%,transparent 12.5%,transparent 87%,#fff 87.5%,#fff);
+  background-size:54px 94px;
+  background-position:0 0,27px 47px;
+}
+.card,.panel{
+  backdrop-filter:blur(10px);
+}
+</style>
+</head><body><header><b>VIP Cyber Cafe — OPERATOR</b><button class="out" id="out">Logout</button></header><div class="wrap"><h2>आपकी Active Services</h2><div id="grid" class="grid"></div></div>
+<script>
+const names={online:"🌐 Online Services",bank:"🏦 Bank Services",bill:"🧾 Bill Payment",print:"🖨️ Bill Print",flight:"✈️ Flight Ticket",train:"🚆 Train Ticket",recharge:"📱 Recharge",due:"💰 Due Payment",reminder:"🔔 Due Reminder",other:"➕ Other"};
+const links={flight:["Akbar Travels","https://www.akbartravels.com/in"],train:["IRCTC","https://www.irctc.co.in/nget/"],online:[["Sarkari Result","https://sarkariresult.com.cm/"],["eDistrict UP","https://edistrict.up.gov.in/"],["Sahaj Retail","https://retail.sahaj.co.in/hi/"]]};
+const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function start(){let r=await fetch("/api/my-services"),d=await r.json();let services=d.services||[];grid.innerHTML=services.map(s=>{
+if(s==="flight")return card(s,names[s],`<a class="open" href="${links.flight[1]}" target="_blank" rel="noopener">${links.flight[0]} खोलें</a>`);
+if(s==="train")return card(s,names[s],`<a class="open" href="${links.train[1]}" target="_blank" rel="noopener">${links.train[0]} खोलें</a>`);
+if(s==="print")return card(s,names[s],`<button class="open" onclick="openBillPrint()">🖨️ Bill बनाएं / Print</button><div id="billbox"></div>`);
+if(s==="bank")return card(s,names[s],`<button class="open" onclick="openData('bank')">🏦 Bank Form / Record</button><div id="box-bank"></div><div id="banklinks"></div>`);
+if(s==="online")return card(s,names[s],links.online.map(x=>`<a class="open" href="${x[1]}" target="_blank" rel="noopener">${x[0]}</a>`).join(""));
+if(s==="other")return card(s,names[s],"<div id='otherlinks'></div>");
+return card(s,names[s],`<button class="open" onclick="openData('${s}')">Open</button><div id="box-${s}"></div>`);
+}).join("")||"<p>Admin ने अभी कोई service active नहीं की है।</p>";if(services.includes("other"))loadOther(); if(services.includes("bank"))loadBankLinks()}
+function card(s,t,a){return `<div class="card"><h3>${t}</h3>${a}</div>`}
+async function loadBankLinks(){let r=await fetch("/api/bank-links"),d=await r.json();banklinks.innerHTML=(d.links||[]).map(x=>`<a class="open" href="${x.url}" target="_blank" rel="noopener">${esc(x.name)} ↗</a>`).join("")||"<p class='muted'>Admin ने अभी कोई Bank Service link नहीं जोड़ा है।</p>"}
+async function loadOther(){let r=await fetch("/api/other-links"),d=await r.json();otherlinks.innerHTML=d.links.map(x=>`<a class="open" href="${x.url}" target="_blank" rel="noopener">${esc(x.name)}</a>`).join("")||"<p class='muted'>Admin ने कोई Other link नहीं जोड़ा है।</p>"}
+async function openData(s){let b=document.getElementById("box-"+s),r=await fetch("/api/data/"+s),d=await r.json();b.innerHTML=`<div class="form"><input id="n-${s}" placeholder="Customer Name">${(s==="due"||s==="reminder")?`<input id="m-${s}" placeholder="Mobile Number"><input id="a-${s}" placeholder="Due Amount"><input id="dt-${s}" type="date">`:""}<input id="d-${s}" placeholder="Details"><button class="open" onclick="addData('${s}')">Save</button></div>${d.items.map(x=>`<div class="item"><b>${esc(x.name||"Entry")}</b><br>${esc(x.details||"")}<br><button class="open del" onclick="delData('${s}',${x.id})">Delete Data</button></div>`).join("")}`}
+async function addData(s){let name=document.getElementById("n-"+s).value,details=document.getElementById("d-"+s).value,body={name,details};if(s==="due"||s==="reminder"){body.mobile=document.getElementById("m-"+s).value;body.amount=document.getElementById("a-"+s).value;body.dueDate=document.getElementById("dt-"+s).value;}await fetch("/api/data/"+s,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});openData(s)}
+async function delData(s,id){if(confirm("यह data delete करें?")){await fetch("/api/data/"+s+"/"+id,{method:"DELETE"});openData(s)}}
+
+async function openBillPrint(){
+ const b=document.getElementById("billbox");
+ b.innerHTML=`<div class="form">
+ <input id="billName" placeholder="Customer Name">
+ <input id="billMobile" placeholder="Mobile Number">
+ <input id="billAmount" type="number" step="0.01" placeholder="Amount">
+ <input id="billDate" type="date">
+ <input id="billDetails" placeholder="Service / Details">
+ <button class="open" onclick="printBill()">🖨️ Print Bill</button></div>`;
+ document.getElementById("billDate").value=new Date().toISOString().slice(0,10);
+}
+function printBill(){
+ const name=document.getElementById("billName").value||"Customer";
+ const mobile=document.getElementById("billMobile").value||"—";
+ const amount=document.getElementById("billAmount").value||"0";
+ const date=document.getElementById("billDate").value||new Date().toISOString().slice(0,10);
+ const details=document.getElementById("billDetails").value||"Service";
+ const w=window.open("","_blank","width=700,height=800");
+ w.document.write(`<!doctype html><html><head><title>VIP CYBER CAFE Bill</title><style>
+ body{font-family:Arial;margin:0;padding:30px;color:#111}.bill{max-width:650px;margin:auto;border:2px solid #111;padding:25px}
+ h1{text-align:center;margin:0;font-size:28px}.sub{text-align:center;margin:5px 0 20px}.line{border-top:1px dashed #555;margin:15px 0}
+ table{width:100%;border-collapse:collapse}td{padding:10px;border-bottom:1px solid #ddd}.total{font-size:20px;font-weight:bold}
+ @media print{body{padding:0}.bill{border:2px solid #111}}
+ </style></head><body><div class="bill">
+ <h1>VIP CYBER CAFE</h1><div class="sub">Customer Service Bill / Receipt</div><div class="line"></div>
+ <table><tr><td><b>Customer Name</b></td><td>${esc(name)}</td></tr><tr><td><b>Mobile Number</b></td><td>${esc(mobile)}</td></tr><tr><td><b>Service / Details</b></td><td>${esc(details)}</td></tr><tr><td><b>Date</b></td><td>${esc(date)}</td></tr><tr><td><b>Amount</b></td><td>₹ ${esc(amount)}</td></tr>
+ <tr><td><b>GST (18%)</b></td><td>₹ ${esc((Number(amount||0)*0.18).toFixed(2))}</td></tr>
+ <tr class="total"><td>Grand Total</td><td>₹ ${esc((Number(amount||0)*1.18).toFixed(2))}</td></tr></table>
+ <div class="line"></div><p style="text-align:center">Thank You — VIP CYBER CAFE</p></div><script>window.onload=()=>window.print();<\/script></body></html>`);
+ w.document.close();
+}
+out.onclick=async()=>{await fetch("/api/logout",{method:"POST"});location="/"};start();
+</script></body></html>
